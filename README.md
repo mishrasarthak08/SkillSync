@@ -2,7 +2,7 @@
 # SkillSync – Peer Learning & Skill Development Platform
 
 **Deployed Links:**
-- **Frontend:** [https://skill-sync-ten-smoky.vercel.app/dashboard](https://skill-sync-ten-smoky.vercel.app/dashboard)
+- **Frontend:** [https://skill-sync-ten-smoky.vercel.app](https://skill-sync-ten-smoky.vercel.app)
 - **Backend:** [https://skillsync-iu61.onrender.com/](https://skillsync-iu61.onrender.com/)
 
 ---
