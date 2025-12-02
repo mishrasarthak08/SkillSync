@@ -14,21 +14,21 @@ export default function ThemeToggle({ fixedPosition = true, className = '' }) {
 
     useEffect(() => {
         const root = document.documentElement;
-        console.log('Applying theme:', isDark ? 'dark' : 'light');
+
 
         if (isDark) {
             root.classList.add('dark');
             localStorage.setItem('theme', 'dark');
-            console.log('Dark class added, classList:', root.classList.toString());
+
         } else {
             root.classList.remove('dark');
             localStorage.setItem('theme', 'light');
-            console.log('Dark class removed, classList:', root.classList.toString());
+
         }
     }, [isDark]);
 
     const toggleTheme = () => {
-        console.log('Toggle clicked, current isDark:', isDark);
+
         setIsDark(prev => !prev);
     };
 

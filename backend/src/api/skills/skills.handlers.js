@@ -17,7 +17,7 @@ export const getAllSkills = async (req, res) => {
             }
         });
 
-        // If user is authenticated, add enrollment status
+
         if (req.user) {
             const userId = req.user.id;
             const userSkills = await prisma.userSkill.findMany({
@@ -223,7 +223,7 @@ export const completeLesson = async (req, res) => {
             });
 
             if (userCompletedSkillsCount === roadmapSkillIds.length) {
-                // Award 2000 XP for roadmap completion
+
                 const bonusXP = 2000;
                 await prisma.user.update({
                     where: { id: userId },
@@ -231,7 +231,7 @@ export const completeLesson = async (req, res) => {
                 });
                 xpAwarded += bonusXP;
 
-                // Update UserRoadmap status to completed
+
                 const userRoadmap = await prisma.userRoadmap.findFirst({
                     where: {
                         userId,
@@ -293,7 +293,7 @@ export const startSkill = async (req, res) => {
     const userId = req.user.id;
 
     try {
-        // Check if user is already enrolled
+
         const existingEnrollment = await prisma.userSkill.findUnique({
             where: {
                 userId_skillId: { userId, skillId }
@@ -307,7 +307,7 @@ export const startSkill = async (req, res) => {
             });
         }
 
-        // Create new enrollment
+
         const userSkill = await prisma.userSkill.create({
             data: {
                 userId,

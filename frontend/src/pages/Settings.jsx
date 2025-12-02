@@ -17,7 +17,7 @@ export default function Settings() {
             try {
                 const token = localStorage.getItem('token');
 
-                // Fetch dashboard data
+
                 const dashboardResponse = await fetch(`${config.API_URL}/api/dashboard`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -26,13 +26,13 @@ export default function Settings() {
                     setDashboardData(data);
                 }
 
-                // Fetch user's completed lessons
+
                 const userResponse = await fetch(`${config.API_URL}/api/users/${user.id}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (userResponse.ok) {
                     const userData = await userResponse.json();
-                    // Get all completed lesson progress
+
                     if (userData.progress) {
                         const completed = userData.progress.filter(p => p.completed);
                         setCompletedLessons(completed);

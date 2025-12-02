@@ -45,7 +45,7 @@ export default function EditProfile() {
                 const interestsResponse = await fetch(`${config.API_URL}/api/users/interests`, { headers });
                 if (interestsResponse.ok) {
                     const interestsData = await interestsResponse.json();
-                    console.log("Fetched available interests:", interestsData);
+
                     setAvailableInterests(interestsData.map(i => i.name));
                 } else {
                     console.error("Failed to fetch interests:", interestsResponse.status);

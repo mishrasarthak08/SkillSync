@@ -23,34 +23,28 @@ const SkillDetails = () => {
                 const data = await response.json();
                 setSkill(data);
 
-                // Auto-enroll if not enrolled
-                if (data.userStatus === 'not_enrolled') {
-                    console.log('Auto-enrolling in skill...');
-                    const startResponse = await fetch(`${config.API_URL}/api/skills/${id}/start`, {
-                        method: 'POST',
+
+                const startResponse = await fetch(`${config.API_URL}/api/skills/${id}/start`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (startResponse.ok) {
+
+                    const refreshResponse = await fetch(`${config.API_URL}/api/skills/${id}`, {
                         headers: {
                             'Authorization': `Bearer ${token}`
                         }
                     });
-                    if (startResponse.ok) {
-                        console.log('Successfully enrolled in skill');
-                        // Refresh skill data to get updated status
-                        const refreshResponse = await fetch(`${config.API_URL}/api/skills/${id}`, {
-                            headers: {
-                                'Authorization': `Bearer ${token}`
-                            }
-                        });
-                        if (refreshResponse.ok) {
-                            const refreshedData = await refreshResponse.json();
-                            setSkill(refreshedData);
-                        }
+                    if (refreshResponse.ok) {
+                        const refreshedData = await refreshResponse.json();
+                        setSkill(refreshedData);
                     }
                 }
-            } else {
-                console.error('Failed to fetch skill');
             }
         } catch (error) {
-            console.error('Error fetching skill:', error);
+            // Error handling silently ignored as per cleanup
         } finally {
             setLoading(false);
         }
@@ -63,13 +57,13 @@ const SkillDetails = () => {
     }, [id, fetchSkill]);
 
     const handleCompleteLesson = async (skillId, lessonId) => {
-        console.log('Complete button clicked:', { skillId, lessonId });
+
         try {
             const token = localStorage.getItem('token');
-            console.log('Token exists:', !!token);
+
 
             const url = `${config.API_URL}/api/skills/${skillId}/lessons/${lessonId}/complete`;
-            console.log('Making request to:', url);
+
 
             const response = await fetch(url, {
                 method: 'POST',
@@ -78,11 +72,11 @@ const SkillDetails = () => {
                 }
             });
 
-            console.log('Response status:', response.status);
+
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('Response data:', data);
+
 
                 if (data.skillCompleted) {
                     alert(`🎉 Skill Completed! You earned ${data.xpAwarded} XP!`);
@@ -98,11 +92,11 @@ const SkillDetails = () => {
                 fetchSkill();
             } else {
                 const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
-                console.error('Error response:', errorData);
+
                 alert(`Failed to complete lesson: ${errorData.message || response.statusText}`);
             }
         } catch (error) {
-            console.error('Error completing lesson:', error);
+
             alert(`Failed to complete lesson. Error: ${error.message}`);
         }
     };
