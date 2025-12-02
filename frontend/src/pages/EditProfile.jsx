@@ -282,20 +282,49 @@ export default function EditProfile() {
                             </div>
 
 
-                            <div className="flex flex-col sm:flex-row items-center justify-end gap-4 pt-6 border-t border-slate-200 dark:border-zinc-800">
+                            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-200 dark:border-zinc-800">
                                 <button
-                                    className="flex w-full sm:w-auto min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-6 bg-transparent text-slate-800 dark:text-zinc-300 text-sm font-bold leading-normal tracking-[0.015em] hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
+                                    className="flex w-full sm:w-auto min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-6 bg-red-500/10 text-red-500 text-sm font-bold leading-normal tracking-[0.015em] hover:bg-red-500/20 transition-colors"
                                     type="button"
-                                    onClick={() => navigate('/settings')}
+                                    onClick={async () => {
+                                        if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                                            try {
+                                                const token = localStorage.getItem('token');
+                                                const response = await fetch(`${config.API_URL}/api/users/${user.id}`, {
+                                                    method: 'DELETE',
+                                                    headers: {
+                                                        'Authorization': `Bearer ${token}`
+                                                    }
+                                                });
+                                                if (response.ok) {
+                                                    localStorage.removeItem('token');
+                                                    window.location.href = '/signup';
+                                                } else {
+                                                    alert('Failed to delete account');
+                                                }
+                                            } catch (error) {
+                                                console.error('Error deleting account:', error);
+                                            }
+                                        }
+                                    }}
                                 >
-                                    <span className="truncate">Cancel</span>
+                                    <span className="truncate">Delete Account</span>
                                 </button>
-                                <button
-                                    className="flex w-full sm:w-auto min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-6 bg-[#13ec5b] text-slate-900 text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#13ec5b]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                    type="submit"
-                                >
-                                    <span className="truncate">Save Changes</span>
-                                </button>
+                                <div className="flex w-full sm:w-auto gap-4">
+                                    <button
+                                        className="flex w-full sm:w-auto min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-6 bg-transparent text-slate-800 dark:text-zinc-300 text-sm font-bold leading-normal tracking-[0.015em] hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
+                                        type="button"
+                                        onClick={() => navigate('/settings')}
+                                    >
+                                        <span className="truncate">Cancel</span>
+                                    </button>
+                                    <button
+                                        className="flex w-full sm:w-auto min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-6 bg-[#13ec5b] text-slate-900 text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#13ec5b]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        type="submit"
+                                    >
+                                        <span className="truncate">Save Changes</span>
+                                    </button>
+                                </div>
                             </div>
                         </form>
                     </div>

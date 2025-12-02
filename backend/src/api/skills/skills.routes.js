@@ -7,5 +7,6 @@ router.get('/', skillHandlers.getAllSkills);
 router.get('/:id', skillHandlers.getSkillById);
 router.post('/:id/start', skillHandlers.startSkill);
 router.post('/:id/lessons/:lessonId/complete', skillHandlers.completeLesson);
+router.delete('/:id/enrollment', skillHandlers.leaveSkill);
 
 export default router;

@@ -325,3 +325,21 @@ export const startSkill = async (req, res) => {
         res.status(500).json({ message: 'Error starting skill' });
     }
 };
+
+export const leaveSkill = async (req, res) => {
+    const { id: skillId } = req.params;
+    const userId = req.user.id;
+
+    try {
+        await prisma.userSkill.delete({
+            where: {
+                userId_skillId: { userId, skillId }
+            }
+        });
+
+        res.json({ message: 'Successfully left the skill' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error leaving skill' });
+    }
+};

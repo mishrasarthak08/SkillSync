@@ -147,6 +147,34 @@ const SkillDetails = () => {
                 <div className="flex flex-col gap-4">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <p className="text-slate-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">{skill.name}</p>
+                        {skill.userStatus !== 'not_enrolled' && (
+                            <button
+                                onClick={async () => {
+                                    if (window.confirm('Are you sure you want to leave this skill? Your progress will be lost.')) {
+                                        try {
+                                            const token = localStorage.getItem('token');
+                                            const response = await fetch(`${config.API_URL}/api/skills/${id}/enrollment`, {
+                                                method: 'DELETE',
+                                                headers: {
+                                                    'Authorization': `Bearer ${token}`
+                                                }
+                                            });
+                                            if (response.ok) {
+                                                // Refresh skill data
+                                                fetchSkill();
+                                            } else {
+                                                alert('Failed to leave skill');
+                                            }
+                                        } catch (error) {
+                                            console.error('Error leaving skill:', error);
+                                        }
+                                    }
+                                }}
+                                className="px-4 py-2 bg-red-500/10 text-red-500 text-sm font-bold rounded-lg hover:bg-red-500/20 transition-colors self-start md:self-auto"
+                            >
+                                Leave Skill
+                            </button>
+                        )}
                     </div>
                     <div className="flex gap-3 flex-wrap">
                         <div className="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-[#13ec5b]/20 px-4">
