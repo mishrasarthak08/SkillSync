@@ -3,7 +3,7 @@
 
 **Deployed Links:**
 - **Frontend:** [https://skill-sync-ten-smoky.vercel.app/dashboard](https://skill-sync-ten-smoky.vercel.app/dashboard)
-- **Backend:** [(https://skillsync-iu61.onrender.com/)](https://skillsync-iu61.onrender.com/)
+- **Backend:** [https://skillsync-iu61.onrender.com/](https://skillsync-iu61.onrender.com/)
 
 ---
 
