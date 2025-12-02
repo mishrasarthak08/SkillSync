@@ -3,7 +3,7 @@
 
 **Deployed Links:**
 - **Frontend:** [https://skill-sync-ten-smoky.vercel.app/dashboard](https://skill-sync-ten-smoky.vercel.app/dashboard)
-- **Backend:** [https://dynamic-illumination-production.up.railway.app](https://dynamic-illumination-production.up.railway.app)
+- **Backend:** [[https://dynamic-illumination-production.up.railway.app](https://skillsync-iu61.onrender.com/)]
 
 ---
 
