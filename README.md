@@ -35,9 +35,10 @@ Self-directed learning can often feel unstructured and isolating. Students and p
 - **Dashboard:** Visual display of current level, total XP, skills mastered, and recent activity.
 
 ### Skills & Roadmaps
-- **Skill Exploration:** Browse and search for skills (e.g., React, Python, Node.js).
+- **Skill Exploration:** Browse and search for skills (e.g., React, Python, Node.js) with advanced filtering and sorting.
 - **Roadmaps:** Structured learning paths combining multiple skills (e.g., "Full Stack Developer").
 - **Enrollment:** One-click enrollment in skills and roadmaps.
+- **Management:** Ability to leave skills if no longer interested.
 
 ### Learning System
 - **Modules & Lessons:** Structured content delivery with video/text lessons.
@@ -50,14 +51,17 @@ Self-directed learning can often feel unstructured and isolating. Students and p
 
 ## 4. CRUD Operations Using APIs
 SkillSync implements full CRUD capabilities through RESTful API endpoints:
-- **Users:** Read profile, Update profile details.
-- **Skills/Roadmaps:** Read details, list all.
-- **Enrollments:** Create (enroll), Update (progress/complete).
-- **Auth:** Create (signup), Read (login/validate).
+- **Create:** User signup, Enroll in Skill/Roadmap, Complete Lesson.
+- **Read:** View Profile, List Skills/Roadmaps (with pagination/search), View Details.
+- **Update:** Edit Profile (Bio, Interests), Update Progress.
+- **Delete:** Delete User Account, Leave Skill (Unenroll).
 
 ## 5. Advanced Data Handling
-To ensure efficient data retrieval:
-- **Search & Filtering:** Users can search for skills by name or category on the Explore page.
+To ensure efficient data retrieval and performance:
+- **Server-Side Pagination:** Efficiently handles large datasets for Skills and Roadmaps.
+- **Backend Search & Filtering:** Database-level search by name/description and filtering by category.
+- **Sorting:** Sort skills by Newest, Oldest, or Name (A-Z/Z-A).
+- **Cascading Deletes:** Robust database schema ensures clean removal of user data (Skills, Progress, Badges) upon account deletion.
 - **Relations:** Efficient handling of complex relationships (User -> Enrollments -> Skills -> Lessons) using Prisma ORM.
 - **Aggregations:** Calculating total XP, completed lessons, and badge eligibility dynamically.
 
@@ -76,11 +80,14 @@ To ensure efficient data retrieval:
 Key endpoints include:
 - `POST /api/auth/login` & `/register`
 - `GET /api/dashboard` (User stats, progress)
-- `GET /api/skills` & `/api/roadmaps` (Listing)
+- `GET /api/skills?page=1&limit=9&search=react` (Listing with pagination/search)
+- `GET /api/roadmaps?page=1&search=fullstack` (Listing with pagination/search)
 - `GET /api/skills/:id` (Details & Modules)
 - `POST /api/skills/:id/start` (Enrollment)
+- `DELETE /api/skills/:id/enrollment` (Leave Skill)
 - `POST /api/skills/:skillId/lessons/:lessonId/complete` (Progress update)
 - `PUT /api/users/:id` (Profile update)
+- `DELETE /api/users/:id` (Delete Account)
 
 ## 8. Implementation Workflow
 1.  **Frontend (React):** Fetches data using `fetch` API; manages state with `useState`/`useEffect` and Context API (AuthContext).
