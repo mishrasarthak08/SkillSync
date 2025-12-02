@@ -20,7 +20,7 @@ export default function Dashboard() {
           }
         });
         if (response.ok) {
-          const data = await response.json();
+          const data = await response.json();  
           setDashboardData(data);
         } else {
           console.error('Failed to fetch dashboard data');
