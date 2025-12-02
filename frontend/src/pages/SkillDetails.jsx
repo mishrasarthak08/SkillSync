@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ThemeToggle from '../components/ThemeToggle';
 import Layout from '../components/Layout';
@@ -8,6 +8,7 @@ import config from '../config';
 const SkillDetails = () => {
     const { user } = useAuth();
     const { id } = useParams();
+    const navigate = useNavigate();
     const [skill, setSkill] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -160,8 +161,7 @@ const SkillDetails = () => {
                                                 }
                                             });
                                             if (response.ok) {
-                                                // Refresh skill data
-                                                fetchSkill();
+                                                navigate('/dashboard');
                                             } else {
                                                 alert('Failed to leave skill');
                                             }
