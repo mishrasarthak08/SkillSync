@@ -4,9 +4,14 @@ const prisma = new PrismaClient();
 
 export const getAllRoadmaps = async (req, res) => {
     try {
-        const { page = 1, limit = 9, search = '' } = req.query;
+        const { page = 1, limit = 9, search = '', sort = 'newest' } = req.query;
         const skip = (parseInt(page) - 1) * parseInt(limit);
         const take = parseInt(limit);
+
+        let orderBy = { createdAt: 'desc' };
+        if (sort === 'oldest') orderBy = { createdAt: 'asc' };
+        if (sort === 'name_asc') orderBy = { title: 'asc' };
+        if (sort === 'name_desc') orderBy = { title: 'desc' };
 
         const where = {};
         if (search) {
@@ -25,7 +30,8 @@ export const getAllRoadmaps = async (req, res) => {
                     },
                 },
                 skip,
-                take
+                take,
+                orderBy
             }),
             prisma.roadmap.count({ where })
         ]);

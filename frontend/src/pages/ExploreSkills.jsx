@@ -10,12 +10,12 @@ const ExploreSkills = () => {
     const [skills, setSkills] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('All');
+    const [sort, setSort] = useState('newest');
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
 
-    // Debounce search input
     useEffect(() => {
         const timer = setTimeout(() => {
             setDebouncedSearch(search);
@@ -33,7 +33,7 @@ const ExploreSkills = () => {
                     limit: 9,
                     search: debouncedSearch,
                     category: filter,
-                    sort: 'newest'
+                    sort: sort
                 });
 
                 const response = await fetch(`${config.API_URL}/api/skills?${queryParams}`, {
@@ -43,8 +43,6 @@ const ExploreSkills = () => {
                 });
                 if (response.ok) {
                     const data = await response.json();
-                    // Handle both new (object with data property) and old (direct array) API response formats
-                    // This prevents crashes if frontend deploys before backend
                     const skillsData = Array.isArray(data) ? data : (data.data || []);
                     const pages = data.pagination ? data.pagination.pages : 1;
 
@@ -61,7 +59,7 @@ const ExploreSkills = () => {
         };
 
         fetchSkills();
-    }, [currentPage, filter, debouncedSearch]);
+    }, [currentPage, filter, debouncedSearch, sort]);
 
     const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
@@ -70,7 +68,7 @@ const ExploreSkills = () => {
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [filter, debouncedSearch]);
+    }, [filter, debouncedSearch, sort]);
 
     const categories = ['All', 'Frontend', 'Backend', 'DevOps', 'Design', 'Data Science', 'Cloud Computing'];
 
@@ -87,8 +85,8 @@ const ExploreSkills = () => {
                 </div>
 
 
-                <div className="w-full">
-                    <label className="flex flex-col h-14 w-full">
+                <div className="w-full flex flex-col sm:flex-row gap-4">
+                    <label className="flex flex-col h-14 w-full sm:w-auto flex-grow">
                         <div className="flex w-full flex-1 items-stretch rounded-xl h-full bg-white dark:bg-zinc-900/50 border border-slate-200 dark:border-zinc-800 focus-within:border-[#13ec5b] focus-within:ring-2 focus-within:ring-[#13ec5b]/50 transition-all">
                             <div className="text-slate-500 dark:text-zinc-400 flex items-center justify-center pl-4">
                                 <span className="material-symbols-outlined">search</span>
@@ -101,6 +99,24 @@ const ExploreSkills = () => {
                             />
                         </div>
                     </label>
+
+                    <div className="h-14 w-full sm:w-48 shrink-0">
+                        <div className="relative h-full">
+                            <select
+                                value={sort}
+                                onChange={(e) => setSort(e.target.value)}
+                                className="w-full h-full appearance-none rounded-xl bg-white dark:bg-zinc-900/50 border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-white px-4 pr-10 focus:outline-none focus:border-[#13ec5b] focus:ring-2 focus:ring-[#13ec5b]/50 transition-all cursor-pointer"
+                            >
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="name_asc">Name (A-Z)</option>
+                                <option value="name_desc">Name (Z-A)</option>
+                            </select>
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 dark:text-zinc-400">
+                                <span className="material-symbols-outlined">sort</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
 
