@@ -40,8 +40,12 @@ const Roadmaps = () => {
                 });
                 if (response.ok) {
                     const data = await response.json();
-                    setRoadmaps(data.data);
-                    setTotalPages(data.pagination.pages);
+                    // Handle both new (object with data property) and old (direct array) API response formats
+                    const roadmapsData = Array.isArray(data) ? data : (data.data || []);
+                    const pages = data.pagination ? data.pagination.pages : 1;
+
+                    setRoadmaps(roadmapsData);
+                    setTotalPages(pages);
                 } else {
                     console.error('Failed to fetch roadmaps');
                 }
