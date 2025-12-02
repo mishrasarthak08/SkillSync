@@ -4,13 +4,31 @@ const prisma = new PrismaClient();
 
 export const getAllRoadmaps = async (req, res) => {
     try {
-        const roadmaps = await prisma.roadmap.findMany({
-            include: {
-                skills: {
-                    orderBy: { order: 'asc' }
+        const { page = 1, limit = 9, search = '' } = req.query;
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+        const take = parseInt(limit);
+
+        const where = {};
+        if (search) {
+            where.OR = [
+                { title: { contains: search, mode: 'insensitive' } },
+                { description: { contains: search, mode: 'insensitive' } }
+            ];
+        }
+
+        const [roadmaps, total] = await Promise.all([
+            prisma.roadmap.findMany({
+                where,
+                include: {
+                    skills: {
+                        orderBy: { order: 'asc' }
+                    },
                 },
-            }
-        });
+                skip,
+                take
+            }),
+            prisma.roadmap.count({ where })
+        ]);
 
         let enhancedRoadmaps = roadmaps;
         if (req.user) {
@@ -28,7 +46,14 @@ export const getAllRoadmaps = async (req, res) => {
             });
         }
 
-        res.json(enhancedRoadmaps);
+        res.json({
+            data: enhancedRoadmaps,
+            pagination: {
+                total,
+                page: parseInt(page),
+                pages: Math.ceil(total / take)
+            }
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Error fetching roadmaps' });

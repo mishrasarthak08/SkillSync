@@ -10,21 +10,41 @@ const ExploreSkills = () => {
     const [skills, setSkills] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('All');
+    const [search, setSearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 9;
+    const [totalPages, setTotalPages] = useState(1);
+
+    // Debounce search input
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(search);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [search]);
 
     useEffect(() => {
         const fetchSkills = async () => {
+            setLoading(true);
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`${config.API_URL}/api/skills`, {
+                const queryParams = new URLSearchParams({
+                    page: currentPage,
+                    limit: 9,
+                    search: debouncedSearch,
+                    category: filter,
+                    sort: 'newest'
+                });
+
+                const response = await fetch(`${config.API_URL}/api/skills?${queryParams}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
                 if (response.ok) {
                     const data = await response.json();
-                    setSkills(data);
+                    setSkills(data.data);
+                    setTotalPages(data.pagination.pages);
                 } else {
                     console.error('Failed to fetch skills');
                 }
@@ -36,16 +56,7 @@ const ExploreSkills = () => {
         };
 
         fetchSkills();
-    }, []);
-
-    const filteredSkills = filter === 'All'
-        ? skills
-        : skills.filter(skill => skill.category === filter);
-
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentSkills = filteredSkills.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(filteredSkills.length / itemsPerPage);
+    }, [currentPage, filter, debouncedSearch]);
 
     const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
@@ -54,7 +65,7 @@ const ExploreSkills = () => {
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [filter]);
+    }, [filter, debouncedSearch]);
 
     const categories = ['All', 'Frontend', 'Backend', 'DevOps', 'Design', 'Data Science', 'Cloud Computing'];
 
@@ -80,6 +91,8 @@ const ExploreSkills = () => {
                             <input
                                 className="flex w-full min-w-0 flex-1 resize-none overflow-hidden text-slate-900 dark:text-white focus:outline-0 focus:ring-0 border-none bg-transparent h-full placeholder:text-slate-400 dark:placeholder:text-zinc-500 px-4 pl-2 text-base font-normal leading-normal"
                                 placeholder="Search for skills..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
                             />
                         </div>
                     </label>
@@ -109,13 +122,13 @@ const ExploreSkills = () => {
                     <div className="text-center py-12">
                         <p className="text-slate-600 dark:text-zinc-400">Loading skills...</p>
                     </div>
-                ) : filteredSkills.length === 0 ? (
+                ) : skills.length === 0 ? (
                     <div className="text-center py-12">
                         <p className="text-slate-600 dark:text-zinc-400">No skills found.</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {currentSkills.map((skill) => (
+                        {skills.map((skill) => (
                             <div key={skill.id} className="flex flex-col gap-4 p-4 bg-white dark:bg-zinc-900/50 rounded-xl border border-slate-200 dark:border-zinc-800 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                                 <div className="w-full aspect-video rounded-lg bg-slate-200 dark:bg-zinc-800 flex items-center justify-center text-slate-400 dark:text-zinc-500">
                                     <span className="material-symbols-outlined text-5xl">school</span>
@@ -147,7 +160,7 @@ const ExploreSkills = () => {
                 )}
 
 
-                {!loading && filteredSkills.length > itemsPerPage && (
+                {!loading && totalPages > 1 && (
                     <div className="flex justify-center items-center gap-2 mt-8 pb-8">
                         <button
                             onClick={() => handlePageChange(currentPage - 1)}

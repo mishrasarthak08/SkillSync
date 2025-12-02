@@ -4,20 +4,43 @@ const prisma = new PrismaClient();
 
 export const getAllSkills = async (req, res) => {
     try {
-        const skills = await prisma.skill.findMany({
-            include: {
-                modules: {
-                    include: {
-                        lessons: true,
-                    },
-                    orderBy: {
-                        order: 'asc',
+        const { page = 1, limit = 9, search = '', category = 'All', sort = 'newest' } = req.query;
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+        const take = parseInt(limit);
+
+        const where = {};
+        if (search) {
+            where.OR = [
+                { name: { contains: search, mode: 'insensitive' } },
+                { description: { contains: search, mode: 'insensitive' } }
+            ];
+        }
+        if (category !== 'All') {
+            where.category = category;
+        }
+
+        let orderBy = { createdAt: 'desc' };
+        if (sort === 'oldest') orderBy = { createdAt: 'asc' };
+        if (sort === 'name_asc') orderBy = { name: 'asc' };
+        if (sort === 'name_desc') orderBy = { name: 'desc' };
+
+        const [skills, total] = await Promise.all([
+            prisma.skill.findMany({
+                where,
+                include: {
+                    modules: {
+                        include: { lessons: true },
+                        orderBy: { order: 'asc' }
                     }
-                }
-            }
-        });
+                },
+                skip,
+                take,
+                orderBy
+            }),
+            prisma.skill.count({ where })
+        ]);
 
-
+        let enhancedSkills = skills;
         if (req.user) {
             const userId = req.user.id;
             const userSkills = await prisma.userSkill.findMany({
@@ -26,15 +49,22 @@ export const getAllSkills = async (req, res) => {
 
             const userSkillsMap = new Map(userSkills.map(us => [us.skillId, us.status]));
 
-            const enhancedSkills = skills.map(skill => ({
+            enhancedSkills = skills.map(skill => ({
                 ...skill,
                 userStatus: userSkillsMap.get(skill.id) || 'not_enrolled'
             }));
-
-            return res.json(enhancedSkills);
+        } else {
+            enhancedSkills = skills.map(skill => ({ ...skill, userStatus: 'not_enrolled' }));
         }
 
-        res.json(skills.map(skill => ({ ...skill, userStatus: 'not_enrolled' })));
+        res.json({
+            data: enhancedSkills,
+            pagination: {
+                total,
+                page: parseInt(page),
+                pages: Math.ceil(total / take)
+            }
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Error fetching skills' });

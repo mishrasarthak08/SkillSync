@@ -9,19 +9,39 @@ const Roadmaps = () => {
     const { user } = useAuth();
     const [roadmaps, setRoadmaps] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+
+    // Debounce search input
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(search);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [search]);
 
     useEffect(() => {
         const fetchRoadmaps = async () => {
+            setLoading(true);
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`${config.API_URL}/api/roadmaps`, {
+                const queryParams = new URLSearchParams({
+                    page: currentPage,
+                    limit: 9,
+                    search: debouncedSearch
+                });
+
+                const response = await fetch(`${config.API_URL}/api/roadmaps?${queryParams}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
                 if (response.ok) {
                     const data = await response.json();
-                    setRoadmaps(data);
+                    setRoadmaps(data.data);
+                    setTotalPages(data.pagination.pages);
                 } else {
                     console.error('Failed to fetch roadmaps');
                 }
@@ -33,7 +53,16 @@ const Roadmaps = () => {
         };
 
         fetchRoadmaps();
-    }, []);
+    }, [currentPage, debouncedSearch]);
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [debouncedSearch]);
 
     return (
         <Layout>
@@ -52,6 +81,22 @@ const Roadmaps = () => {
                     </div>
                 </div>
 
+                <div className="w-full">
+                    <label className="flex flex-col h-14 w-full">
+                        <div className="flex w-full flex-1 items-stretch rounded-xl h-full bg-white dark:bg-zinc-900/50 border border-slate-200 dark:border-zinc-800 focus-within:border-[#13ec5b] focus-within:ring-2 focus-within:ring-[#13ec5b]/50 transition-all">
+                            <div className="text-slate-500 dark:text-zinc-400 flex items-center justify-center pl-4">
+                                <span className="material-symbols-outlined">search</span>
+                            </div>
+                            <input
+                                className="flex w-full min-w-0 flex-1 resize-none overflow-hidden text-slate-900 dark:text-white focus:outline-0 focus:ring-0 border-none bg-transparent h-full placeholder:text-slate-400 dark:placeholder:text-zinc-500 px-4 pl-2 text-base font-normal leading-normal"
+                                placeholder="Search roadmaps..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
+                        </div>
+                    </label>
+                </div>
+
 
                 <section className="flex flex-col gap-6">
                     {loading ? (
@@ -60,7 +105,7 @@ const Roadmaps = () => {
                         </div>
                     ) : roadmaps.length === 0 ? (
                         <div className="text-center py-12">
-                            <p className="text-slate-600 dark:text-zinc-400">No roadmaps available yet.</p>
+                            <p className="text-slate-600 dark:text-zinc-400">No roadmaps available.</p>
                         </div>
                     ) : (
                         roadmaps.map((roadmap) => (
@@ -100,6 +145,39 @@ const Roadmaps = () => {
                         ))
                     )}
                 </section>
+
+                {!loading && totalPages > 1 && (
+                    <div className="flex justify-center items-center gap-2 mt-8 pb-8">
+                        <button
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            className="flex items-center justify-center size-10 rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <span className="material-symbols-outlined">chevron_left</span>
+                        </button>
+
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
+                            <button
+                                key={number}
+                                onClick={() => handlePageChange(number)}
+                                className={`flex items-center justify-center size-10 rounded-lg text-sm font-bold transition-colors ${currentPage === number
+                                    ? 'bg-[#13ec5b] text-black'
+                                    : 'border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800'
+                                    }`}
+                            >
+                                {number}
+                            </button>
+                        ))}
+
+                        <button
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                            className="flex items-center justify-center size-10 rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <span className="material-symbols-outlined">chevron_right</span>
+                        </button>
+                    </div>
+                )}
             </div>
         </Layout>
     );
